@@ -1,0 +1,6 @@
+@REscueRide_HostAddress = http://localhost:5196
+
+GET {{RescueRide_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
