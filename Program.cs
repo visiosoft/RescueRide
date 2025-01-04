@@ -2,6 +2,7 @@ using RescueRide.Data;
 using Microsoft.EntityFrameworkCore;
 using RescueRide.Models;
 using RescueRide.Services;
+using RescueRide.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +14,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSignalR();
 
-builder.Services.AddSingleton<RabbitMQConsumerService>();
+builder.Services.AddTransient<RabbitMQConsumerService>();  // Singleton for RabbitMQ consumer service
 builder.Services.AddHostedService<RabbitMQConsumerWorker>();
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        policy =>
+        {
+            policy.AllowAnyOrigin()     // Allow all origins
+                      .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,9 +38,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapHub<LocationHub>("/locationHub");
 
 app.UseAuthorization();
-
+app.UseCors("AllowAllOrigins");
 app.MapControllers();
 
 app.Run();

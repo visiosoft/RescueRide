@@ -1,7 +1,10 @@
-﻿using RabbitMQ.Client.Events;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
+using RescueRide.SignalR;
+using System;
 using RescueRide.Controllers;
 using RescueRide.Data;
 
@@ -9,65 +12,78 @@ namespace RescueRide.Services
 {
     public class RabbitMQConsumerService
     {
-        
-            private const string QueueName = "driver_location_queue";  // The name of the queue to consume from
-            private const string HostName = "localhost";               // RabbitMQ server hostname
+        private const string QueueName = "driver_location_queue";  // The name of the queue to consume from
+        private const string HostName = "localhost";
+        private readonly IServiceProvider _serviceProvider;  // To resolve IHubContext<LocationHub> dynamically
 
-            public void Start()
+        // Inject IServiceProvider into constructor
+        public RabbitMQConsumerService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        public void Start()
+        {
+            // Create a connection factory
+            var factory = new ConnectionFactory() { HostName = HostName };
+
+            // Create a connection to RabbitMQ
+            using (var connection = factory.CreateConnection())
+            // Create a channel to communicate with RabbitMQ
+            using (var channel = connection.CreateModel())
             {
-                // Create a connection factory
-                var factory = new ConnectionFactory() { HostName = HostName };
+                // Declare the queue (it must exist)
+                channel.QueueDeclare(queue: QueueName,
+                                     durable: true,      // The queue will survive server restarts
+                                     exclusive: false,   // The queue will not be exclusive to a connection
+                                     autoDelete: false,  // The queue won't be automatically deleted when unused
+                                     arguments: null);   // No custom arguments
 
-                // Create a connection to RabbitMQ
-                using (var connection = factory.CreateConnection())
-                // Create a channel to communicate with RabbitMQ
-                using (var channel = connection.CreateModel())
+                // Create a consumer
+                var consumer = new EventingBasicConsumer(channel);
+
+                // Define what happens when a message is received
+                consumer.Received += async (model, ea) =>
                 {
-                    // Declare the queue (it must exist)
-                    channel.QueueDeclare(queue: QueueName,
-                                         durable: true,      // The queue will survive server restarts
-                                         exclusive: false,   // The queue will not be exclusive to a connection
-                                         autoDelete: false,  // The queue won't be automatically deleted when unused
-                                         arguments: null);   // No custom arguments
+                    var body = ea.Body.ToArray();
+                    var message = Encoding.UTF8.GetString(body);
+                    Console.WriteLine($"Received: {message}");
 
-                    // Create a consumer
-                    var consumer = new EventingBasicConsumer(channel);
+                    // Process the message (You can add your logic here)
+                    ProcessMessage(message);
+                };
 
-                    // Define what happens when a message is received
-                    consumer.Received += async (model, ea) =>
-                    {
-                        var body = ea.Body.ToArray();
-                        var message = Encoding.UTF8.GetString(body);
-                        Console.WriteLine($"Received: {message}");
+                // Start consuming messages from the queue
+                channel.BasicConsume(queue: QueueName,
+                                     autoAck: true,  // Acknowledge the message automatically
+                                     consumer: consumer);
 
-                        // Process the message (You can add your logic here)
-                        ProcessMessage(message);
-                    };
-
-                    // Start consuming messages from the queue
-                    channel.BasicConsume(queue: QueueName,
-                                         autoAck: true,  // Acknowledge the message automatically
-                                         consumer: consumer);
-
-                    Console.WriteLine(" [*] Waiting for messages. Press [enter] to exit.");
-                    Console.ReadLine();
-                }
+                Console.WriteLine(" [*] Waiting for messages. Press [enter] to exit.");
+                Console.ReadLine();
             }
+        }
+
         public static Dictionary<string, DriverLocation> DriverLocations = new Dictionary<string, DriverLocation>();
 
-        private void  ProcessMessage(string message)
+        private void ProcessMessage(string message)
         {
             // Deserialize the message to DriverLocation (or you can use a library like Newtonsoft.Json to do this)
-            // Here, assume the message is a JSON string that can be directly deserialized into DriverLocation
             var location = Newtonsoft.Json.JsonConvert.DeserializeObject<DriverLocation>(message);
 
-            // Save the location to the database
+            // Resolve the IHubContext using IServiceProvider
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                // Get IHubContext<LocationHub> from the service provider
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<LocationHub>>();
+
+                // Broadcast the location update to all clients
+                hubContext.Clients.All.SendAsync("ReceiveLocationUpdate", location);
+            }
+
+            // Save the location to the dictionary (or database if needed)
             if (location != null)
             {
                 DriverLocationStore.DriverLocations[location.DriverId] = location;
-
-                // _context.DriverLocations.Add(location);
-                // await _context.SaveChangesAsync();
                 Console.WriteLine($"Saved location for driver {location.DriverId} at {location.Timestamp}");
             }
             else
