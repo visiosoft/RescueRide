@@ -17,10 +17,14 @@ namespace RescueRide.Services
         private readonly IServiceProvider _serviceProvider;  // To resolve IHubContext<LocationHub> dynamically
         private const string HostName = "0.tcp.ngrok.io";  // Ngrok public hostname
         private const int Port = 19881;  // Ngrok-provided port
+        private readonly MongoDbService _mongoDbService;
+
         // Inject IServiceProvider into constructor
-        public RabbitMQConsumerService(IServiceProvider serviceProvider)
+        public RabbitMQConsumerService(IServiceProvider serviceProvider, MongoDbService mongoDbService)
         {
             _serviceProvider = serviceProvider;
+            _mongoDbService = mongoDbService;
+
         }
 
         public void Start()
@@ -72,7 +76,7 @@ namespace RescueRide.Services
 
         public static Dictionary<string, DriverLocation> DriverLocations = new Dictionary<string, DriverLocation>();
 
-        private void ProcessMessage(string message)
+        private async void ProcessMessage(string message)
         {
             // Deserialize the message to DriverLocation (or you can use a library like Newtonsoft.Json to do this)
             var location = Newtonsoft.Json.JsonConvert.DeserializeObject<DriverLocation>(message);
@@ -90,8 +94,9 @@ namespace RescueRide.Services
             // Save the location to the dictionary (or database if needed)
             if (location != null)
             {
-                DriverLocationStore.DriverLocations[location.DriverId] = location;
-                Console.WriteLine($"Saved location for driver {location.DriverId} at {location.Timestamp}");
+
+                await _mongoDbService.InsertDocumentAsync(location, "DriverLocations"); // Make sure collection name matches
+
             }
             else
             {

@@ -18,6 +18,13 @@ builder.Services.AddSignalR();
 
 builder.Services.AddTransient<RabbitMQConsumerService>();  // Singleton for RabbitMQ consumer service
 builder.Services.AddHostedService<RabbitMQConsumerWorker>();
+
+builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("MongoSettings"));
+
+// Register MongoDbService with DI container
+builder.Services.AddSingleton<MongoDbService>();
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",

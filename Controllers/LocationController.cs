@@ -1,9 +1,13 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RescueRide.Data;
+using RescueRide.Services;
 
 namespace RescueRide.Controllers
 {
@@ -12,18 +16,19 @@ namespace RescueRide.Controllers
     public class LocationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly MongoDbService _mongoDbService;
 
-        public LocationController(IConfiguration configuration)
+        public LocationController(IConfiguration configuration, MongoDbService mongoDbService)
         {
             _configuration = configuration;
+            _mongoDbService = mongoDbService;
+
         }
 
         [HttpGet]
         public IActionResult GetAllLocations()
         {
-            // Retrieve all the driver locations from the static dictionary
-            var allLocations = DriverLocationStore.DriverLocations.Values;
-
+            var allLocations = _mongoDbService.GetCollection<DriverLocation>("DriverLocations").AsQueryable().ToList();
             // Return the list of locations as a response
             return Ok(allLocations);
         }
@@ -40,9 +45,10 @@ namespace RescueRide.Controllers
                 Password = "guest"               // Default RabbitMQ password
             };
 
+            //var collection = _mongoDbService.GetCollection<DriverLocation>("DriversLocation");
+            //collection.InsertOneAsync(location);
 
-
-          //  var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQ:Host"] };
+            //  var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQ:Host"] };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -67,10 +73,12 @@ namespace RescueRide.Controllers
 
     public class DriverLocation
     {
+        [BsonId]
+        public ObjectId Id { get; set; }
         public string DriverId { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public DateTime Timestamp { get; set; }  
+        public DateTime Timestamp { get; set; }
 
     }
 }
