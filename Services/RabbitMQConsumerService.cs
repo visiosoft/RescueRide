@@ -13,7 +13,7 @@ namespace RescueRide.Services
     public class RabbitMQConsumerService
     {
         private const string QueueName = "driver_location_queue";  // The name of the queue to consume from
-        private const string HostName = "localhost";
+        private const string HostName = "https://14cc-87-201-97-245.ngrok-free.app/";
         private readonly IServiceProvider _serviceProvider;  // To resolve IHubContext<LocationHub> dynamically
 
         // Inject IServiceProvider into constructor
