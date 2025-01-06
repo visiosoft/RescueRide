@@ -13,9 +13,10 @@ namespace RescueRide.Services
     public class RabbitMQConsumerService
     {
         private const string QueueName = "driver_location_queue";  // The name of the queue to consume from
-        private const string HostName = "https://14cc-87-201-97-245.ngrok-free.app/";
+                                                                   // private const string HostName = "localhost";
         private readonly IServiceProvider _serviceProvider;  // To resolve IHubContext<LocationHub> dynamically
-
+        private const string HostName = "0.tcp.ngrok.io";  // Ngrok public hostname
+        private const int Port = 19881;  // Ngrok-provided port
         // Inject IServiceProvider into constructor
         public RabbitMQConsumerService(IServiceProvider serviceProvider)
         {
@@ -24,15 +25,21 @@ namespace RescueRide.Services
 
         public void Start()
         {
-            // Create a connection factory
-            var factory = new ConnectionFactory() { HostName = HostName };
+            // Create a connection factory with Ngrok-provided URL
+            var factory = new ConnectionFactory()
+            {
+                HostName = "0.tcp.in.ngrok.io",  // Ngrok public hostname
+                Port = 19881,                    // Ngrok forwarded port
+                UserName = "guest",              // Default RabbitMQ username
+                Password = "guest"               // Default RabbitMQ password
+            };
 
             // Create a connection to RabbitMQ
             using (var connection = factory.CreateConnection())
             // Create a channel to communicate with RabbitMQ
             using (var channel = connection.CreateModel())
             {
-                // Declare the queue (it must exist)
+                // Declare the queue
                 channel.QueueDeclare(queue: QueueName,
                                      durable: true,      // The queue will survive server restarts
                                      exclusive: false,   // The queue will not be exclusive to a connection
@@ -49,7 +56,7 @@ namespace RescueRide.Services
                     var message = Encoding.UTF8.GetString(body);
                     Console.WriteLine($"Received: {message}");
 
-                    // Process the message (You can add your logic here)
+                    // Process the message
                     ProcessMessage(message);
                 };
 
@@ -92,4 +99,6 @@ namespace RescueRide.Services
             }
         }
     }
+
+
 }

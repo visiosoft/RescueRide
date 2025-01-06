@@ -32,7 +32,17 @@ namespace RescueRide.Controllers
         public IActionResult PostLocation([FromBody] DriverLocation location)
         {
             // Send location to RabbitMQ
-            var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQ:Host"] };
+            var factory = new ConnectionFactory()
+            {
+                HostName = "0.tcp.in.ngrok.io",  // Ngrok public hostname
+                Port = 19881,                    // Ngrok forwarded port
+                UserName = "guest",              // Default RabbitMQ username
+                Password = "guest"               // Default RabbitMQ password
+            };
+
+
+
+          //  var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQ:Host"] };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
