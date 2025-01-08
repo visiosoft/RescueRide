@@ -25,7 +25,7 @@
                 // User configuration
                 modelBuilder.Entity<User>(entity =>
                 {
-                    entity.HasKey(u => u.UserId);
+                    entity.HasKey(u => u.Id);
                     entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
                     entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
                     entity.Property(u => u.Role).IsRequired();

@@ -1,8 +1,13 @@
-﻿namespace RescueRide.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace RescueRide.Models
 {
     public class User
     {
-        public int UserId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)] // Ensure MongoDB handles this as an ObjectId
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
