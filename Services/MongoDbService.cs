@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using RescueRide.Controllers;
 using RescueRide.Data;
 
 namespace RescueRide.Services
@@ -29,6 +31,13 @@ namespace RescueRide.Services
         // Method to insert a document
         public async Task InsertDocumentAsync<T>(T document, string collectionName)
         {
+            if (document is DriverLocation driverLocation)
+            {
+                if (string.IsNullOrEmpty(driverLocation.Id) || !ObjectId.TryParse(driverLocation.Id, out _))
+                {
+                    driverLocation.Id = ObjectId.GenerateNewId().ToString();
+                }
+            }
             var collection = GetCollection<T>(collectionName);
             Console.WriteLine($"Inserting document to collection {collectionName}...");
             await collection.InsertOneAsync(document);

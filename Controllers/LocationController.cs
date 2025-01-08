@@ -74,7 +74,8 @@ namespace RescueRide.Controllers
     public class DriverLocation
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public string DriverId { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
