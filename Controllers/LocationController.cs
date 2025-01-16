@@ -29,26 +29,26 @@ namespace RescueRide.Controllers
         public IActionResult GetAllLocations()
         {
             var allLocations = _mongoDbService.GetCollection<DriverLocation>("DriverLocations").AsQueryable().ToList();
-            // Return the list of locations as a response
             return Ok(allLocations);
         }
 
         [HttpPost]
         public IActionResult PostLocation([FromBody] DriverLocation location)
         {
-            // Send location to RabbitMQ
+            var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
+            // Read RabbitMQ settings
+            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             var factory = new ConnectionFactory()
             {
-                HostName = "0.tcp.in.ngrok.io",  // Ngrok public hostname
-                Port = 19881,                    // Ngrok forwarded port
-                UserName = "guest",              // Default RabbitMQ username
-                Password = "guest"               // Default RabbitMQ password
+                HostName = rabbitMqConfig["HostName"],
+                Port = int.Parse(rabbitMqConfig["Port"]),
+                UserName = rabbitMqConfig["UserName"],
+                Password = rabbitMqConfig["Password"]
             };
-
-            //var collection = _mongoDbService.GetCollection<DriverLocation>("DriversLocation");
-            //collection.InsertOneAsync(location);
-
-            //  var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQ:Host"] };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
