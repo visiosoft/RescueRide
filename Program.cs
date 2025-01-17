@@ -48,17 +48,17 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 app.MapGet("/", context =>
 {
-   // context.Response.Redirect("/home/index.html");
+   context.Response.Redirect("/home/index.html");
     return Task.CompletedTask;
 });
 app.UseHttpsRedirection();
 app.MapHub<LocationHub>("/locationHub");
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "home")),
-    RequestPath = "/home"
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(
+//        Path.Combine(Directory.GetCurrentDirectory(), "home")),
+//    RequestPath = "/home"
+//});
 
 app.UseAuthorization();
 app.UseCors("AllowAllOrigins");
