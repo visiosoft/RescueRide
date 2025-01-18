@@ -33,7 +33,7 @@ namespace RescueRide.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostLocation([FromBody] DriverLocation location)
+        public async Task<IActionResult> PostLocation([FromBody] DriverLocation location)
         {
             var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -59,6 +59,8 @@ namespace RescueRide.Controllers
                                      arguments: null);
 
                 var message = JsonConvert.SerializeObject(location);
+
+                await _mongoDbService.InsertDocumentAsync(location, "DriverLocations");
                 var body = Encoding.UTF8.GetBytes(message);
 
                 channel.BasicPublish(exchange: "",
