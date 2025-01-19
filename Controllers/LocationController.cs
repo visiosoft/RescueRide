@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RescueRide.Data;
 using RescueRide.Services;
+using System.Reflection.Metadata;
 
 namespace RescueRide.Controllers
 {
@@ -68,7 +69,7 @@ namespace RescueRide.Controllers
                                      basicProperties: null,
                                      body: body);
             }
-            return Ok();
+            return Ok("Document inserted and message published to RabbitMQ.");
         }
 
     }
