@@ -32,9 +32,13 @@ jobs:
       - name: Install Web Deploy
         run: |
           choco install webdeploy -y
-          refreshenv
+          
+      # Step 6: Update PATH for msdeploy
+      - name: Add Web Deploy to PATH
+        run: |
+          echo "##vso[task.setvariable variable=PATH]C:\Program Files\IIS\Microsoft Web Deploy V3;${{ env.PATH }}"
 
-      # Step 6: Deploy to IIS Server using Web Deploy
+      # Step 7: Deploy to IIS Server using Web Deploy
       - name: Deploy to IIS Server
         run: |
           msdeploy.exe -source:contentPath="./bin/Release" ^
