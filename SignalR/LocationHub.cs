@@ -25,6 +25,8 @@ namespace RescueRide.SignalR
             Console.WriteLine($"Client {Context.ConnectionId} subscribed to {groupName}");
         }
 
+
+
         // Method for clients to unsubscribe from a driver's updates
         public async Task UnsubscribeFromDriver(string driverId)
         {
