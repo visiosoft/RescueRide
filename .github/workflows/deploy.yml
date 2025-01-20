@@ -3,23 +3,27 @@ name: Deploy to IIS Server
 on:
   push:
     branches:
-      - master  # Trigger deployment on pushes to the main branch
+      - master
 
 jobs:
   deploy:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Check out the code
+      # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Build the project
+      # Step 2: Install MSBuild
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      # Step 3: Build the project
       - name: Build Project
         run: |
-          vsbuild /p:Configuration=Release
+          msbuild /p:Configuration=Release
 
-      # Step 3: Deploy to IIS Server using Web Deploy
+      # Step 4: Deploy to IIS Server using Web Deploy
       - name: Deploy to IIS Server
         run: |
           msdeploy.exe -source:contentPath="./bin/Release" ^
