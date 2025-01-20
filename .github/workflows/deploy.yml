@@ -28,7 +28,13 @@ jobs:
         run: |
           msbuild RescueRide.sln /p:Configuration=Release
 
-      # Step 5: Deploy to IIS Server using Web Deploy
+      # Step 5: Install Web Deploy
+      - name: Install Web Deploy
+        run: |
+          choco install webdeploy -y
+          refreshenv
+
+      # Step 6: Deploy to IIS Server using Web Deploy
       - name: Deploy to IIS Server
         run: |
           msdeploy.exe -source:contentPath="./bin/Release" ^
