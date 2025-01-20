@@ -28,6 +28,7 @@ jobs:
         run: |
           msbuild RescueRide.sln /p:Configuration=Release
 
+
       # Step 5: Install Web Deploy
       - name: Install Web Deploy
         run: |
