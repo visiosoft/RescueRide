@@ -14,18 +14,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Restore NuGet packages
+      # Step 2: Restore NuGet Packages
       - name: Restore NuGet Packages
         run: |
           nuget restore RescueRide.sln
 
-      # Step 3: Build the project
+      # Step 3: Setup MSBuild
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      # Step 4: Build the Project
       - name: Build Project
         run: |
           msbuild RescueRide.sln /p:Configuration=Release
 
-      # Step 4: Deploy to IIS Server using Web Deploy
+      # Step 5: Deploy to IIS Server using Web Deploy
       - name: Deploy to IIS Server
         run: |
           msdeploy.exe -source:contentPath="./bin/Release" ^
-                       -dest:auto,computerName="${{ secrets.DEPLOY_SERVER }}",userName="${{ secrets.DEPLOY_USERNAME }}",password="${{ secrets.DEPLOY_PASSWORD }}
+                       -dest:auto,computerName="${{ secrets.DEPLOY_SERVER }}",userName="${{ secrets.DEPLOY_USERNAME }}",password="${{ secrets.DEPLOY_PASSWORD }}",includeAcls="False" ^
+                       -allowUntrusted ^
+                       -siteName="${{ secrets.DEPLOY_SITE }}"
