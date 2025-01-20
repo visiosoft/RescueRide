@@ -3,7 +3,7 @@ name: Deploy to IIS Server
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -32,16 +32,11 @@ jobs:
       - name: Install Web Deploy
         run: |
           choco install webdeploy -y
-          
-      # Step 6: Update PATH for msdeploy
-      - name: Add Web Deploy to PATH
-        run: |
-          echo "##vso[task.setvariable variable=PATH]C:\Program Files\IIS\Microsoft Web Deploy V3;${{ env.PATH }}"
 
-      # Step 7: Deploy to IIS Server using Web Deploy
-      - name: Deploy to IIS Server
+      # Step 6: Explicitly reference the msdeploy.exe full path
+      - name: Deploy to IIS Server using Web Deploy
         run: |
-          msdeploy.exe -source:contentPath="./bin/Release" ^
+          "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -source:contentPath="./bin/Release" ^
                        -dest:auto,computerName="${{ secrets.DEPLOY_SERVER }}",userName="${{ secrets.DEPLOY_USERNAME }}",password="${{ secrets.DEPLOY_PASSWORD }}",includeAcls="False" ^
                        -allowUntrusted ^
                        -siteName="${{ secrets.DEPLOY_SITE }}"
