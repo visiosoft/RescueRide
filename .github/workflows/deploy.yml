@@ -28,7 +28,6 @@ jobs:
         run: |
           msbuild RescueRide.sln /p:Configuration=Release
 
-
       # Step 5: Install Web Deploy
       - name: Install Web Deploy
         run: |
@@ -38,12 +37,13 @@ jobs:
       - name: Deploy to IIS Server
         shell: pwsh
         run: |
-      $msdeployPath = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
-$arguments = @(
-    "-source:contentPath=./bin/Release"
-    "-dest:auto,computerName=***,userName=***,password=***"
-    "-allowUntrusted"
-    "-site:***"
-)
-& $msdeployPath @arguments
-
+          $msdeployPath = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
+          $arguments = @(
+            "-source:contentPath=./bin/Release"
+            "-dest:auto,computerName=${{ secrets.DEPLOY_SERVER }},userName=${{ secrets.DEPLOY_USERNAME }},password=${{ secrets.DEPLOY_PASSWORD }},includeAcls=False"
+            "-allowUntrusted"
+            "-siteName=${{ secrets.DEPLOY_SITE }}"
+          )
+          # Output the arguments for debugging
+          Write-Host "Deploying with arguments: $arguments"
+          & $msdeployPath @arguments
