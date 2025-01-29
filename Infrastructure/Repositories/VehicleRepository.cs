@@ -20,7 +20,7 @@ namespace RescueRide.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Vehicle>> GetVehiclesByUserIdAsync(int userId)
+        public async Task<List<Vehicle>> GetVehiclesByUserIdAsync(string userId)
         {
             return await _context.Vehicles.Where(v => v.UserId == userId).ToListAsync();
         }

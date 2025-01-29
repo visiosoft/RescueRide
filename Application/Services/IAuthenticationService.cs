@@ -6,6 +6,6 @@ namespace RescueRide.Application.Services
     {
         Task<TokenResponse> Authenticate(string username, string password);
         void GenerateOtp(string username);
-        bool ValidateOtp(string username, string otp);
+        Task<bool> ValidateOtp(string idToken);
     }
 }

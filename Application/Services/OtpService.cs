@@ -1,22 +1,43 @@
-﻿namespace RescueRide.Application.Services
+﻿using FirebaseAdmin.Auth;
+
+namespace RescueRide.Application.Services
 {
     public class OtpService : IOtpService
     {
         private readonly Dictionary<string, string> _otpStore = new();
         private readonly TimeSpan _otpExpiry = TimeSpan.FromMinutes(5);
 
-        public void SendOtp(string username)
+        public async Task<string> SendOtp(string phoneNumber)
         {
-            var otp = new Random().Next(100000, 999999).ToString();
-            _otpStore[username] = otp;
+            try
+            {
+                var sessionInfo = await FirebaseAuth.DefaultInstance.CreateSessionCookieAsync(phoneNumber, new SessionCookieOptions
+                {
+                    ExpiresIn = TimeSpan.FromMinutes(10)
+                });
 
-            // Simulate sending OTP (replace with Twilio, Firebase, etc.)
-            Console.WriteLine($"OTP for {username}: {otp}");
+                Console.WriteLine($"OTP sent to {phoneNumber}");
+                return sessionInfo;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending OTP: {ex.Message}");
+                return null;
+            }
         }
 
-        public bool ValidateOtp(string username, string otp)
+        public async Task<bool> ValidateOtp(string idToken)
         {
-            return _otpStore.TryGetValue(username, out var storedOtp) && storedOtp == otp;
+            try
+            {
+                var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+                return decodedToken != null && decodedToken.Claims.ContainsKey("phone_number");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"OTP validation failed: {ex.Message}");
+                return false;
+            }
         }
     }
 

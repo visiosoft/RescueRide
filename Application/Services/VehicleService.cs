@@ -17,7 +17,7 @@ namespace RescueRide.Application.Services
             await _vehicleRepository.AddVehicleAsync(vehicle);
         }
 
-        public async Task<List<Vehicle>> GetVehiclesByUserIdAsync(int userId)
+        public async Task<List<Vehicle>> GetVehiclesByUserIdAsync(string userId)
         {
             return await _vehicleRepository.GetVehiclesByUserIdAsync(userId);
         }

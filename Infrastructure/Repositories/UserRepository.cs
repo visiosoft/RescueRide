@@ -34,7 +34,7 @@ namespace RescueRide.Infrastructure.Repositories
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _usersCollection.Find(u => u.Email == email).FirstOrDefaultAsync();
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
@@ -44,7 +44,7 @@ namespace RescueRide.Infrastructure.Repositories
 
         public async Task<bool> ValidateUserAsync(string username, string password)
         {
-            var user = await GetUserByUsernameAsync(username);
+            var user = await GetUserByEmailAsync(username);
             return user != null && user.PasswordHash == password;
         }
     }

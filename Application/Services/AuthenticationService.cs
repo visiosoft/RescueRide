@@ -1,6 +1,5 @@
 ﻿using RescueRide.Application.DTOs.Authentication;
 using RescueRide.Infrastructure.Repositories;
-using IAuthenticationService = RescueRide.Application.Services.IAuthenticationService;
 
 
 namespace RescueRide.Application.Services
@@ -18,14 +17,14 @@ namespace RescueRide.Application.Services
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<TokenResponse> Authenticate(string username, string password)
+        public async Task<TokenResponse> Authenticate(string email, string password)
         {
-            var user = await _userRepository.GetUserByUsernameAsync(username);
+            var user = await _userRepository.GetUserByEmailAsync(email);
             if (user == null)
             {
-                return new TokenResponse { ErrorMessage = "Invalid Username" };
+                return new TokenResponse { ErrorMessage = "Invalid Email" };
             }
-            var isValidPassword = await _userRepository.ValidateUserAsync(username, password);
+            var isValidPassword = await _userRepository.ValidateUserAsync(email, password);
             if (!isValidPassword)
             {
                 return new TokenResponse { ErrorMessage = "Invalid Password" };
@@ -49,9 +48,9 @@ namespace RescueRide.Application.Services
             _otpService.SendOtp(username);
         }
 
-        public bool ValidateOtp(string username, string otp)
+        public Task<bool> ValidateOtp(string idToken)
         {
-            return _otpService.ValidateOtp(username, otp);
+            return _otpService.ValidateOtp(idToken);
         }
     }
 

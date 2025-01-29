@@ -6,7 +6,7 @@ namespace RescueRide.Infrastructure.Repositories
     {
         Task<int> AddServiceAsync(Service service);
         Task<Service> GetServiceByIdAsync(int serviceId);
-        Task<List<Service>> GetServicesByUserIdAsync(int userId);
+        Task<List<Service>> GetServicesByUserIdAsync(string userId);
         Task UpdateServiceStatusAsync(int serviceId, string status);
         Task CancelServiceAsync(int serviceId);
     }

@@ -26,7 +26,7 @@ namespace RescueRide.Infrastructure.Repositories
             return await _context.Services.FindAsync(serviceId);
         }
 
-        public async Task<List<Service>> GetServicesByUserIdAsync(int userId)
+        public async Task<List<Service>> GetServicesByUserIdAsync(string userId)
         {
             return await _context.Services.Where(s => s.CustomerId == userId).ToListAsync();
         }

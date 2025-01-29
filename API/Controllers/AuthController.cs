@@ -7,6 +7,8 @@ using LoginRequest = RescueRide.Application.DTOs.Authentication.LoginRequest;
 
 namespace RescueRide.API.Controllers
 {
+    [ApiController]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly Application.Services.IAuthenticationService _authenticationService;
@@ -19,8 +21,8 @@ namespace RescueRide.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var response = await _authenticationService.Authenticate(request.Username, request.Password);
-            if (response != null)
+            var response = await _authenticationService.Authenticate(request.Email, request.Password);
+            if (response.ErrorMessage != null)
             {
                 return Unauthorized(new { message = response.ErrorMessage });
             }
@@ -35,12 +37,17 @@ namespace RescueRide.API.Controllers
         }
 
         [HttpPost("validate-otp")]
-        public IActionResult ValidateOtp([FromBody] OtpRequest request)
+        public async Task<IActionResult> ValidateOtp([FromBody] string idToken)
         {
-            if (_authenticationService.ValidateOtp(request.Username, request.Otp))
-                return Ok("OTP validated successfully");
-
-            return Unauthorized("Invalid OTP");
+            bool isValid = await _authenticationService.ValidateOtp(idToken);
+            if (isValid)
+            {
+                return Ok(new { message = "OTP is valid." });
+            }
+            else
+            {
+                return BadRequest(new { message = "Invalid OTP." });
+            }
         }
     }
 }

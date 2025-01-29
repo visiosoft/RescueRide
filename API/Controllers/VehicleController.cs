@@ -23,7 +23,7 @@ namespace RescueRide.API.Controllers
         }
 
         [HttpGet("user/{id}")]
-        public async Task<IActionResult> GetVehiclesByUserId(int id)
+        public async Task<IActionResult> GetVehiclesByUserId(string id)
         {
             var vehicles = await _vehicleService.GetVehiclesByUserIdAsync(id);
             return Ok(vehicles);

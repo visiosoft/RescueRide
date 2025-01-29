@@ -22,7 +22,7 @@ namespace RescueRide.Application.Services
             return await _serviceRepository.GetServiceByIdAsync(serviceId);
         }
 
-        public async Task<List<Service>> GetServicesByUserIdAsync(int userId)
+        public async Task<List<Service>> GetServicesByUserIdAsync(string userId)
         {
             return await _serviceRepository.GetServicesByUserIdAsync(userId);
         }

@@ -3,8 +3,8 @@
     public class Service
     {
         public int ServiceId { get; set; }
-        public int CustomerId { get; set; }
-        public int ServiceProviderId { get; set; }
+        public string CustomerId { get; set; }
+        public string ServiceProviderId { get; set; }
         public int GuestUserId { get; set; }
         public int VehicleId { get; set; }
         public string ServiceType { get; set; }

@@ -2,8 +2,8 @@
 {
     public interface IOtpService
     {
-        void SendOtp(string username);
-        bool ValidateOtp(string username, string otp);
+        Task<string> SendOtp(string phoneNumber);
+        Task<bool> ValidateOtp(string idToken);
     }
 
 }
