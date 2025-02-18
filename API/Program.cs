@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secretKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? jwtSettings["Key"];
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+//var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
 string firebasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Infrastructure", "firebase-adminsdk.json");
 
