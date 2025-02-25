@@ -49,5 +49,18 @@ namespace RescueRide.API.Controllers
                 return BadRequest(new { message = "Invalid OTP." });
             }
         }
+        [HttpPost("test-otp")]
+        public async Task<IActionResult> Test([FromBody] string idToken)
+        {
+            bool isValid = await _authenticationService.ValidateOtp(idToken);
+            if (isValid)
+            {
+                return Ok(new { message = "OTP is valid." });
+            }
+            else
+            {
+                return BadRequest(new { message = "Invalid OTP." });
+            }
+        }
     }
 }
